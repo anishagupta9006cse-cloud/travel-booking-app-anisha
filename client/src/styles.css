@@ -1,0 +1,25 @@
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, sans-serif; background: #f5f8fb; color: #12263a; }
+.container { max-width: 960px; margin: 0 auto; padding: 16px; }
+.nav { display: flex; justify-content: space-between; align-items: center; padding: 12px 24px; background: #0e3a5b; color: #fff; }
+.nav a, .nav .link { color: #fff; margin-left: 16px; text-decoration: none; }
+.brand { font-weight: 700; font-size: 20px; margin: 0 !important; }
+.card { background: #fff; border-radius: 10px; padding: 16px; margin: 12px 0; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+.narrow { max-width: 420px; margin: 24px auto; display: flex; flex-direction: column; gap: 10px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+.row { display: flex; gap: 8px; align-items: center; }
+.wrap { flex-wrap: wrap; } .between { justify-content: space-between; }
+input, select { padding: 9px 10px; border: 1px solid #c5d3e0; border-radius: 6px; font-size: 14px; width: 100%; }
+.row input, .row select { width: auto; flex: 1; min-width: 120px; }
+label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.check { flex-direction: row; align-items: center; } .check input { width: auto; }
+button, .btn { background: #0a7ea4; color: #fff; border: 0; padding: 9px 14px; border-radius: 6px; cursor: pointer; text-decoration: none; display: inline-block; font-size: 14px; }
+button:disabled { opacity: .6; cursor: not-allowed; }
+button.secondary { background: #6b7c8c; } button.danger { background: #d64545; }
+button.link { background: none; color: #0a7ea4; padding: 0; } .nav button.link { color: #fff; }
+.muted { color: #6b7c8c; font-size: 14px; } .error { color: #c0392b; } .notice { background: #e8f4fd; padding: 10px; border-radius: 6px; }
+.tag { background: #e0f2f1; color: #00695c; padding: 2px 8px; border-radius: 10px; font-size: 12px; text-transform: capitalize; }
+.badge { padding: 2px 8px; border-radius: 10px; font-size: 12px; background: #eee; }
+.badge.CONFIRMED { background: #d4f5df; } .badge.PAYMENT_FAILED { background: #fadbd8; }
+.badge.CANCELLED, .badge.REFUND_PENDING, .badge.REFUNDED { background: #fdebd0; }
+.alert { display: flex; justify-content: space-between; align-items: center; gap: 8px; background: #fdecea; padding: 10px; border-radius: 6px; margin-top: 8px; }
