@@ -11,7 +11,9 @@ const asyncHandler = (fn) => (req, res, next) =>
 const escapeRegex = (string) => string.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 
 // GET /api/listings
+
 router.get('/', asyncHandler(async (req, res) => {
+  console.log("Listing API hit ho gayi!");
   const { origin, destination, type, maxPrice, travelers } = req.query;
   const q = {};
 
