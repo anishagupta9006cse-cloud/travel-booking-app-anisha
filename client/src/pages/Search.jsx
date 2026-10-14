@@ -2,9 +2,11 @@
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api from '../api.js';
+import { useCurrency } from '../context/CurrencyContext';
 
 export default function Search() {
   // 1. Filter state me 'origin' add kiya
+  const { formatPrice } = useCurrency();
   const [f, setF] = useState({ origin: '', destination: '', type: '', maxPrice: '', travelers: 1 });
   const [applied, setApplied] = useState(f);
 
@@ -49,7 +51,7 @@ export default function Search() {
       </form>
 
       {isLoading && <p className="muted">Searching...</p>}
-      {error && <p className="error">Could not load results</p>}[span_0](start_span)[span_0](end_span)
+      {error && <p className="error">Could not load results</p>} 
       {data?.length === 0 && <p className="muted">No results. Try a different route or budget.</p>}
 
       <div className="grid">
@@ -64,7 +66,7 @@ export default function Search() {
             </p>
 
             {l.description && <p>{l.description}</p>}
-            <p><b>₹{l.price.toLocaleString('en-IN')}</b> / person · {l.inventory} left</p>
+            <p><b>{formatPrice(l.price)}</b> / person - {l.inventory} left</p>
             
             {l.lat && (
               <a className="muted" target="_blank" rel="noreferrer" href={`https://www.openstreetmap.org/?mlat=${l.lat}&mlon=${l.lng}#map=12/${l.lat}/${l.lng}`}>
