@@ -2,8 +2,10 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api, { errMsg } from '../api.js';
 import { downloadTicket } from '../utils/ticket.js';
+import { useCurrency } from '../context/CurrencyContext';
 
 export default function MyBookings() {
+  const { formatPrice } = useCurrency();
   const qc = useQueryClient();
   const [msg, setMsg] = useState('');
   const { data, isLoading, error } = useQuery({ queryKey: ['mine'], queryFn: () => api.get('/bookings/mine').then((r) => r.data) });
@@ -37,7 +39,7 @@ export default function MyBookings() {
             <h3>{b.listing?.title}</h3>
             <span className={`badge ${b.status}`}>{b.status}</span>
           </div>
-          <p className="muted">ID {b.code} · {new Date(b.startDate).toDateString()} · {b.travelers} traveler(s) · ₹{b.amount.toLocaleString('en-IN')}</p>
+          <p className="muted">ID {b.code} · {new Date(b.startDate).toDateString()} · {b.travelers} traveler(s) · {formatPrice(b.totalPrice || b.price || 0)} </p>
           <div className="row">
             {['DRAFT', 'PAYMENT_PENDING', 'PAYMENT_FAILED', 'CONFIRMED'].includes(b.status) && (
               <button className="secondary" onClick={() => window.confirm('Cancel this booking?') && cancel.mutate(b._id)}>Cancel</button>
