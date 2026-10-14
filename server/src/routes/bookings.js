@@ -1,4 +1,4 @@
-import { Router } from 'express';
+ import { Router } from 'express';
 import { z } from 'zod';
 import Booking from '../models/Booking.js';
 import Listing from '../models/Listing.js';
@@ -14,6 +14,7 @@ const createSchema = z.object({
   travelers: z.number().int().min(1).max(10),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   coach: z.string().max(20).optional(),
+  mealOption: z.enum(['none','veg','non-veg','jain']).optional(),
 });
 
 router.post('/', asyncHandler(async (req, res) => {
@@ -27,9 +28,18 @@ router.post('/', asyncHandler(async (req, res) => {
   if (listing.inventory < d.travelers) return res.status(409).json({ error: 'Not enough availability' });
 
   // PRICE SERVER PAR CALCULATE HOTA HAI, client ka price ignore
+  const MEAL_PRICES = { none: 0, veg: 150, 'non-veg': 200, jain: 150 };
+  const mealCost = MEAL_PRICES[d.mealOption || 'none'] || 0;
+  const finalAmount = (listing.price * d.travelers) + mealCost;
+
   const booking = await Booking.create({
-    user: req.user._id, listing: listing._id, travelers: d.travelers,
-    startDate, coach: d.coach, amount: listing.price * d.travelers,
+    user: req.user._id, 
+    listing: listing._id, 
+    travelers: d.travelers,
+    startDate, 
+    coach: d.coach, 
+    mealOption: d.mealOption || 'none',
+    amount: finalAmount,
   });
   res.status(201).json(booking);
 }));

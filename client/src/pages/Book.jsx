@@ -1,4 +1,4 @@
-import { useState } from 'react';
+ import { useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import api, { errMsg } from '../api.js';
@@ -12,6 +12,14 @@ const loadRazorpay = () => new Promise((res) => {
   document.body.appendChild(s);
 });
 
+// Meal prices map
+const MEAL_PRICES = {
+  none: 0,
+  veg: 150,
+  'non-veg': 200,
+  jain: 150
+};
+
 export default function Book() {
   const { id } = useParams();
   const [sp] = useSearchParams();
@@ -19,6 +27,7 @@ export default function Book() {
   const [travelers, setTravelers] = useState(Number(sp.get('travelers')) || 1);
   const [startDate, setStartDate] = useState('');
   const [coach, setCoach] = useState('');
+  const [mealOption, setMealOption] = useState('none'); // <-- Meal State Added
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [done, setDone] = useState(null);
@@ -36,11 +45,17 @@ export default function Book() {
     e.preventDefault();
     setErr(''); setBusy(true);
     try {
-      const { data: booking } = await api.post('/bookings', { listingId: id, travelers: Number(travelers), startDate, coach: coach || undefined });
+      // mealOption backend par bheja ja raha hai
+      const { data: booking } = await api.post('/bookings', { 
+        listingId: id, 
+        travelers: Number(travelers), 
+        startDate, 
+        coach: coach || undefined,
+        mealOption 
+      });
       const { data: order } = await api.post('/payments/create-order', { bookingId: booking._id });
 
       if (order.mock) {
-        // Sandbox/mock mode: gateway keys nahi hain
         await verify(booking._id, { orderId: order.orderId, paymentId: 'mock_pay', signature: 'mock' });
       } else {
         if (!(await loadRazorpay())) throw new Error('Could not load payment gateway');
@@ -53,11 +68,16 @@ export default function Book() {
     setBusy(false);
   }
 
+  // Calculate estimated total including meal cost
+  const mealCost = MEAL_PRICES[mealOption] || 0;
+  const estimatedTotal = (l.price * Number(travelers)) + mealCost;
+
   if (done) {
     return (
       <div className="card narrow">
         <h2>Booking confirmed ✅</h2>
         <p>Booking ID: <b>{done.code}</b></p>
+        <p>Meal: <b>{done.mealOption ? done.mealOption.toUpperCase() : 'None'}</b></p>
         <p>Amount paid: ₹{done.amount.toLocaleString('en-IN')}</p>
         <button onClick={() => downloadTicket({ ...done, listing: l })}>⬇ Download ticket</button>
         <button onClick={() => nav('/bookings')}>View my bookings</button>
@@ -69,10 +89,31 @@ export default function Book() {
     <form className="card narrow" onSubmit={payNow}>
       <h2>{l.title}</h2>
       <p className="muted">{l.destination}</p>
-      <label>Travel date<input type="date" required min={new Date().toISOString().slice(0, 10)} value={startDate} onChange={(e) => setStartDate(e.target.value)} /></label>
-      <label>Travelers<input type="number" min="1" max="10" value={travelers} onChange={(e) => setTravelers(e.target.value)} /></label>
-      <label>Coach / seat area (optional)<input placeholder="e.g. B2" maxLength="20" value={coach} onChange={(e) => setCoach(e.target.value)} /></label>
-      <p>Estimated total: <b>₹{(l.price * travelers).toLocaleString('en-IN')}</b> <span className="muted">(final price server calculate karta hai)</span></p>
+      
+      <label>Travel date
+        <input type="date" required min={new Date().toISOString().slice(0, 10)} value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+      </label>
+      
+      <label>Travelers
+        <input type="number" min="1" max="10" value={travelers} onChange={(e) => setTravelers(e.target.value)} />
+      </label>
+      
+      <label>Coach / seat area (optional)
+        <input placeholder="e.g. B2" maxLength="20" value={coach} onChange={(e) => setCoach(e.target.value)} />
+      </label>
+
+      {/* Meal Selection Dropdown Added */}
+      <label>Add Meal Service
+        <select value={mealOption} onChange={(e) => setMealOption(e.target.value)} style={{ padding: '8px', width: '100%', marginTop: '5px', marginBottom: '10px' }}>
+          <option value="none">No Meal (₹0)</option>
+          <option value="veg">Veg Thali (₹150)</option>
+          <option value="non-veg">Non-Veg Thali (₹200)</option>
+          <option value="jain">Jain Meal (₹150)</option>
+        </select>
+      </label>
+
+      <p>Estimated total: <b>₹{estimatedTotal.toLocaleString('en-IN')}</b> <span className="muted">(final price server calculate karta hai)</span></p>
+      
       {err && <p className="error">{err}</p>}
       <button disabled={busy}>{busy ? 'Processing...' : 'Pay & Confirm'}</button>
     </form>

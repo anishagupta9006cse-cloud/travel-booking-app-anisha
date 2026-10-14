@@ -8,6 +8,7 @@ const bookingSchema = new mongoose.Schema({
   travelers: { type: Number, required: true, min: 1, max: 10 },
   startDate: { type: Date, required: true },
   coach: String, // coach / seat area (emergency matching ke liye)
+  mealOption: {type:String, enum:['none','veg','non-veg','jain'],default: 'none'}
   amount: { type: Number, required: true },
   status: { type: String, enum: Object.values(STATUS), default: STATUS.DRAFT },
   history: [{ status: String, at: { type: Date, default: Date.now }, note: String }], // audit log
